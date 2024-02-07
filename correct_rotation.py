@@ -29,7 +29,7 @@ def process_images(model, input_path, output_path,
         if os.path.splitext(output_path)[1].lower() in extensions:
             print('Output must be a directory!')
 
-    predictions = model.predict_generator(
+    predictions = model.predict(
         RotNetDataGenerator(
             image_paths,
             input_shape=(224, 224, 3),
@@ -40,7 +40,7 @@ def process_images(model, input_path, output_path,
             crop_largest_rect=True,
             crop_center=True
         ),
-        val_samples=len(image_paths)
+        # val_samples=len(image_paths)
     )
 
     predicted_angles = np.argmax(predictions, axis=1)

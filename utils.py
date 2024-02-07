@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from keras.preprocessing.image import Iterator
-from keras.utils.np_utils import to_categorical
+from keras.utils import to_categorical
 import keras.backend as K
 
 
@@ -225,7 +225,7 @@ def generate_rotated_image(image, angle, size=None, crop_center=False,
 class RotNetDataGenerator(Iterator):
     """
     Given a NumPy array of images or a list of image paths,
-    generate batches of rotated images and rotation angles on-the-fly.
+    generate batches of rotated images and rotationngles on-the-fly.
     """
 
     def __init__(self, input, input_shape=None, color_mode='rgb', batch_size=64,
@@ -265,9 +265,9 @@ class RotNetDataGenerator(Iterator):
 
     def _get_batches_of_transformed_samples(self, index_array):
         # create array to hold the images
-        batch_x = np.zeros((len(index_array),) + self.input_shape, dtype='float32')
+        batch_x = np.zeros((len(index_array),) + self.input_shape, dtype='uint8')
         # create array to hold the labels
-        batch_y = np.zeros(len(index_array), dtype='float32')
+        batch_y = np.zeros(len(index_array), dtype='uint8')
 
         # iterate through the current batch
         for i, j in enumerate(index_array):
@@ -279,28 +279,30 @@ class RotNetDataGenerator(Iterator):
                 if is_color:
                     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-            if self.rotate:
-                # get a random angle
-                rotation_angle = np.random.randint(360)
-            else:
-                rotation_angle = 0
+            batch_x = image
 
-            # generate the rotated image
-            rotated_image = generate_rotated_image(
-                image,
-                rotation_angle,
-                size=self.input_shape[:2],
-                crop_center=self.crop_center,
-                crop_largest_rect=self.crop_largest_rect
-            )
+            # if self.rotate:
+            #     # get a random angle
+            #     rotation_angle = np.random.randint(360)
+            # else:
+            #     rotation_angle = 0
 
-            # add dimension to account for the channels if the image is greyscale
-            if rotated_image.ndim == 2:
-                rotated_image = np.expand_dims(rotated_image, axis=2)
+            # # generate the rotated image
+            # rotated_image = generate_rotated_image(
+            #     image,
+            #     rotation_angle,
+            #     size=self.input_shape[:2],
+            #     crop_center=self.crop_center,
+            #     crop_largest_rect=self.crop_largest_rect
+            # )
 
-            # store the image and label in their corresponding batches
-            batch_x[i] = rotated_image
-            batch_y[i] = rotation_angle
+            # # add dimension to account for the channels if the image is greyscale
+            # if rotated_image.ndim == 2:
+            #     rotated_image = np.expand_dims(rotated_image, axis=2)
+
+            # # store the image and label in their corresponding batches
+            # batch_x[i] = rotated_image
+            # batch_y[i] = rotation_angle
 
         if self.one_hot:
             # convert the numerical labels to binary labels
@@ -311,6 +313,8 @@ class RotNetDataGenerator(Iterator):
         # preprocess input images
         if self.preprocess_func:
             batch_x = self.preprocess_func(batch_x)
+
+        print(batch_x.dtype, batch_y.dtype)
 
         return batch_x, batch_y
 
